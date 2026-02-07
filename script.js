@@ -23,17 +23,39 @@ envelope.addEventListener("click", () => {
 // Logic to move the NO btn
 
 noBtn.addEventListener("mouseover", () => {
-    const min = 200;
-    const max = 200;
-
-    const distance = Math.random() * (max - min) + min;
+    const distance = 200;
     const angle = Math.random() * Math.PI * 2;
 
     const moveX = Math.cos(angle) * distance;
     const moveY = Math.sin(angle) * distance;
 
+    const rect = noBtn.getBoundingClientRect();
+
+    // Current translate values (if already moved before)
+    const currentTransform = getComputedStyle(noBtn).transform;
+    let currentX = 0, currentY = 0;
+
+    if (currentTransform !== "none") {
+        const matrix = currentTransform.match(/matrix.*\((.+)\)/)[1].split(", ");
+        currentX = parseFloat(matrix[4]);
+        currentY = parseFloat(matrix[5]);
+    }
+
+    let newX = currentX + moveX;
+    let newY = currentY + moveY;
+
+    // Viewport boundaries
+    const minX = -rect.left;
+    const maxX = window.innerWidth - rect.right;
+    const minY = -rect.top;
+    const maxY = window.innerHeight - rect.bottom;
+
+    // Clamp movement
+    newX = Math.max(minX, Math.min(newX, maxX));
+    newY = Math.max(minY, Math.min(newY, maxY));
+
     noBtn.style.transition = "transform 0.3s ease";
-    noBtn.style.transform = `translate(${moveX}px, ${moveY}px)`;
+    noBtn.style.transform = `translate(${newX}px, ${newY}px)`;
 });
 // YES is clicked
 
@@ -47,4 +69,5 @@ yesBtn.addEventListener("click", () => {
     buttons.style.display = "none";
 
     finalText.style.display = "block";
+
 });
